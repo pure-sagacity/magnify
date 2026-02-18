@@ -1,0 +1,5 @@
+name = "magnify"
+
+[[r2_buckets]]
+binding = "magnify_bucket"
+bucket_name = "magnify-bucket"
