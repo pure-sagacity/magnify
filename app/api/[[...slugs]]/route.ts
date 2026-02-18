@@ -10,7 +10,7 @@ const app = new Elysia({ prefix: '/api' })
         response: z.object({
             ok: z.boolean()
         })
-    })
+    });
 
 export const GET = app.fetch;
 export const POST = app.fetch;

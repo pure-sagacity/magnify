@@ -1,5 +1,5 @@
 import { betterAuth } from "better-auth";
-import { admin } from "better-auth/plugins";
+import { admin, anonymous } from "better-auth/plugins";
 import { nextCookies } from "better-auth/next-js";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "./db"; // your drizzle instance
@@ -22,6 +22,7 @@ export const auth = betterAuth({
 
     plugins: [
         nextCookies(),
-        admin()
+        admin(),
+        anonymous(),
     ]
 });
