@@ -1,12 +1,14 @@
 import { relations } from "drizzle-orm";
 import { pgTable, text, json, timestamp, boolean, index, serial } from "drizzle-orm/pg-core";
-import { Address, PriceRange } from "@/types";
+import { PriceRange, Address } from "@/types";
 
 export const listings = pgTable("listings", {
     id: text("listing_id").notNull().primaryKey().$defaultFn(() => crypto.randomUUID()),
+    jobTitle: text("job_title").notNull(),
     posterID: text("poster_id").notNull().references(() => user.id, { onDelete: "cascade" }),
     summary: text("summary").notNull().default("No summary was provided by the listing owner."),
-    salary: json("salary").notNull(),
+    salary: json("salary").notNull().$type<PriceRange>(),
+    status: text("status").notNull().$type<"hiring" | "filled" | "capacity">(),
 
     // Optional Values
     skills: text("skills").array(),
@@ -14,7 +16,7 @@ export const listings = pgTable("listings", {
     workEnvironment: text("work_env"),
 
     company: text("company").notNull(),
-    location: json("location").notNull(),
+    location: json("location").$type<Address>().notNull(),
     created_at: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
         .defaultNow()

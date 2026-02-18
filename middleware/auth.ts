@@ -1,7 +1,7 @@
-import { getSession } from "@/actions.getSession";
+import { getSession } from "@/actions/getSession";
 import Elysia from "elysia";
 
-export const authMiddleware = new Elysia()
+export const authMiddleware = new Elysia({ name: "authMiddleware" })
     .onBeforeHandle(async (context) => {
         // Logic to extract and verify session/token (e.g., from headers or cookies)
         const session = await getSession();

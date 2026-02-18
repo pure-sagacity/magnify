@@ -12,12 +12,14 @@ export interface Address {
 
 export interface JobListing {
     id: string;
+    jobTitle: string,
     posterID: string;
     summary: string;
-    salary: PriceRange
-    skills?: string[];
-    minimum?: string[];
-    workEnvironment?: string;
+    salary: PriceRange;
+    status: "hiring" | "filled" | "capacity";
+    skills: string[] | null;
+    minimum: string[] | null;
+    workEnvironment: string | null;
     company: string;
     location: Address;
 }

@@ -15,6 +15,13 @@
       "when": 1771378126495,
       "tag": "0001_same_blob",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1771389999394,
+      "tag": "0002_pretty_la_nuit",
+      "breakpoints": true
     }
   ]
 }
