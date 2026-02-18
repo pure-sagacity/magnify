@@ -1,23 +1,24 @@
 import { db } from '@/lib/db';
 import { type InferInsertModel } from "drizzle-orm";
-import { listings as listingTable } from '@/lib/schema';
+import { listings as listingTable, resumes as resumeTable } from '@/lib/schema';
 import { employerChecker } from '@/middleware/role';
-import { JobListing } from '@/types';
+import { JobListing, Resume, Status } from '@/types';
 import { eq } from 'drizzle-orm';
 import { Elysia } from 'elysia';
-import z, { string } from "zod";
+import z from "zod";
 import { listingOwnerGuard } from '@/middleware/listingOwner';
+import { getListing } from '@/actions/getListing';
 
 type NewJobListing = InferInsertModel<typeof listingTable>;
 
 const PriceSchema = z.object({
     min: z.number(),
     max: z.number()
-}),
+});
 
 const JobSchema = z.object({
     id: z.string(),
-    jobTitle: string;
+    jobTitle: z.string(),
     posterID: z.string(),
     summary: z.string(),
     salary: PriceSchema,
@@ -33,6 +34,16 @@ const JobSchema = z.object({
         zipCode: z.string()
     })
 })
+
+const ResumeSchema = z.object({
+    id: z.string(),
+    userId: z.string(),
+    jobId: z.string(),
+    resumeKey: z.string(),
+    createdAt: z.date()
+})
+
+const StatusSchema = z.enum(["hiring", "filled", "capacity"]);
 
 const listings = new Elysia({ prefix: "/listings" })
     .get("/", async () => {
@@ -54,6 +65,17 @@ const listings = new Elysia({ prefix: "/listings" })
         }),
         response: z.array(JobSchema)
     })
+    .get("/:id", async ({ params }) => {
+        const id = params.id;
+
+        const listing = await getListing(id);
+
+        return listing;
+    }, {
+        params: z.object({
+            id: z.string()
+        })
+    })
     .use(employerChecker)
     .post("/", async ({ body }) => {
         const partialJob = body satisfies NewJobListing;
@@ -62,14 +84,14 @@ const listings = new Elysia({ prefix: "/listings" })
             .values(partialJob)
             .returning({ id: listingTable.id });
 
-        return response[0].id;
+        return { id: response[0].id };
     }, {
         body: z.object({
             jobTitle: z.string(),
             posterID: z.string(),
             summary: z.string(),
             salary: PriceSchema,
-            status: z.enum(["hiring", "filled", "capacity"]),
+            status: StatusSchema,
             skills: z.array(z.string()).nullable(),
             minimum: z.array(z.string()).nullable(),
             workEnvironment: z.string().nullable(),
@@ -81,9 +103,64 @@ const listings = new Elysia({ prefix: "/listings" })
                 zipCode: z.string()
             })
         }),
-        response: z.string()
+        response: z.object({
+            id: z.string()
+        })
     })
-    .use(listingOwnerGuard);
+    .use(listingOwnerGuard)
+    .put("/:id/status", async ({ params, body }) => {
+        const newStatus = body.newStatus satisfies Status;
+        const id = params.id;
+
+        const response = await db.update(listingTable).set({ status: newStatus }).where(eq(listingTable.id, id)).returning();
+        return response[0];
+    }, {
+        params: z.object({
+            id: z.string(),
+        }),
+        body: z.object({
+            newStatus: StatusSchema
+        }),
+        response: JobSchema
+    });
+
+const resumes = new Elysia({ prefix: "/resumes" })
+    .use(listingOwnerGuard)
+    .get("/", async ({ }) => {
+        const response: Resume[] = await db.select().from(resumeTable);
+
+        return response;
+    }, {
+        response: z.array(ResumeSchema)
+    })
+    .post("/resumes", async ({ body }) => {
+        const { userId, jobId, resume } = body;
+        const buffer = Buffer.from(await resume.arrayBuffer());
+
+        // upload buffer to S3 here
+
+        const resumeKey = "67";
+
+        const newResume = {
+            id: crypto.randomUUID(),
+            userId,
+            jobId,
+            resumeKey,
+            createdAt: new Date(Date.now())
+        } satisfies Resume;
+
+        // store key in DB
+        const response = await db.insert(resumeTable).values(newResume).returning();
+        return response[0];
+    }, {
+        body: z.object({
+            resume: z.instanceof(File),
+            userId: z.string(),
+            jobId: z.string(),
+        }),
+        response: ResumeSchema
+    })
+
 
 const app = new Elysia({ prefix: '/api' })
     .get("/status", () => {
@@ -94,7 +171,8 @@ const app = new Elysia({ prefix: '/api' })
         response: z.object({
             ok: z.boolean()
         })
-    });
+    })
+    .use(listings);
 
 export const GET = app.fetch;
 export const POST = app.fetch;

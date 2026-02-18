@@ -16,14 +16,26 @@ CREATE TABLE "account" (
 --> statement-breakpoint
 CREATE TABLE "listings" (
 	"listing_id" text PRIMARY KEY NOT NULL,
+	"job_title" text NOT NULL,
 	"poster_id" text NOT NULL,
 	"summary" text DEFAULT 'No summary was provided by the listing owner.' NOT NULL,
 	"salary" json NOT NULL,
+	"status" text NOT NULL,
 	"skills" text[],
 	"minimum" text[],
 	"work_env" text,
 	"company" text NOT NULL,
-	"location" json NOT NULL
+	"location" json NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "resumes" (
+	"id" text PRIMARY KEY NOT NULL,
+	"user_id" text NOT NULL,
+	"job_id" text NOT NULL,
+	"resume_key" text NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "session" (
@@ -60,6 +72,8 @@ CREATE TABLE "verification" (
 --> statement-breakpoint
 ALTER TABLE "account" ADD CONSTRAINT "account_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "listings" ADD CONSTRAINT "listings_poster_id_user_id_fk" FOREIGN KEY ("poster_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "resumes" ADD CONSTRAINT "resumes_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "resumes" ADD CONSTRAINT "resumes_job_id_listings_listing_id_fk" FOREIGN KEY ("job_id") REFERENCES "public"."listings"("listing_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "session" ADD CONSTRAINT "session_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "account_userId_idx" ON "account" USING btree ("user_id");--> statement-breakpoint
 CREATE INDEX "session_userId_idx" ON "session" USING btree ("user_id");--> statement-breakpoint

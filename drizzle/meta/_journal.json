@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1771377039756,
-      "tag": "0000_clammy_shiver_man",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1771378126495,
-      "tag": "0001_same_blob",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1771389999394,
-      "tag": "0002_pretty_la_nuit",
+      "when": 1771445631645,
+      "tag": "0000_cooing_yellow_claw",
       "breakpoints": true
     }
   ]

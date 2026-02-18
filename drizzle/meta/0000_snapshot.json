@@ -1,5 +1,5 @@
 {
-  "id": "a9adff0c-2d5b-47a7-8a14-6dc92deba665",
+  "id": "ba7ce996-dc5e-4c01-8402-9c2888437d17",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -136,6 +136,12 @@
           "primaryKey": true,
           "notNull": true
         },
+        "job_title": {
+          "name": "job_title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
         "poster_id": {
           "name": "poster_id",
           "type": "text",
@@ -152,6 +158,12 @@
         "salary": {
           "name": "salary",
           "type": "json",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -184,6 +196,20 @@
           "type": "json",
           "primaryKey": false,
           "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
         }
       },
       "indexes": {},
@@ -197,6 +223,77 @@
           ],
           "columnsTo": [
             "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.resumes": {
+      "name": "resumes",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "job_id": {
+          "name": "job_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "resume_key": {
+          "name": "resume_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "resumes_user_id_user_id_fk": {
+          "name": "resumes_user_id_user_id_fk",
+          "tableFrom": "resumes",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "resumes_job_id_listings_listing_id_fk": {
+          "name": "resumes_job_id_listings_listing_id_fk",
+          "tableFrom": "resumes",
+          "tableTo": "listings",
+          "columnsFrom": [
+            "job_id"
+          ],
+          "columnsTo": [
+            "listing_id"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"

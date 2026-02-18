@@ -3,6 +3,8 @@ export type PriceRange = {
     max: number;
 }
 
+export type Status = "hiring" | "filled" | "capacity";
+
 export interface Address {
     street: string;
     city: string;
@@ -16,7 +18,7 @@ export interface JobListing {
     posterID: string;
     summary: string;
     salary: PriceRange;
-    status: "hiring" | "filled" | "capacity";
+    status: Status;
     skills: string[] | null;
     minimum: string[] | null;
     workEnvironment: string | null;
@@ -25,7 +27,7 @@ export interface JobListing {
 }
 
 export interface Resume {
-    id: number;
+    id: string;
     userId: string;
     jobId: string;
     resumeKey: string;

@@ -25,7 +25,7 @@ export const listings = pgTable("listings", {
 });
 
 export const resumes = pgTable("resumes", {
-    id: serial("id").primaryKey().notNull(),
+    id: text("id").primaryKey().notNull().$defaultFn(() => crypto.randomUUID()),
     userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
     jobId: text("job_id").notNull().references(() => listings.id, { onDelete: "cascade" }),
     resumeKey: text("resume_key").notNull(),
