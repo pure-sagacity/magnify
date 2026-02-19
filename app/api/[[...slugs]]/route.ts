@@ -8,6 +8,9 @@ import { Elysia } from 'elysia';
 import z from "zod";
 import { listingOwnerGuard } from '@/middleware/listingOwner';
 import { getListing } from '@/actions/getListing';
+import { upload } from '@/actions/upload';
+import { authMiddleware } from '@/middleware/auth';
+import { getResume } from '@/actions/getResume';
 
 type NewJobListing = InferInsertModel<typeof listingTable>;
 
@@ -125,29 +128,20 @@ const listings = new Elysia({ prefix: "/listings" })
     });
 
 const resumes = new Elysia({ prefix: "/resumes" })
-    .use(listingOwnerGuard)
-    .get("/", async ({ }) => {
-        const response: Resume[] = await db.select().from(resumeTable);
-
-        return response;
-    }, {
-        response: z.array(ResumeSchema)
-    })
+    .use(authMiddleware)
     .post("/resumes", async ({ body }) => {
         const { userId, jobId, resume } = body;
-        const buffer = Buffer.from(await resume.arrayBuffer());
-
-        // upload buffer to S3 here
-
-        const resumeKey = "67";
-
+        const id = crypto.randomUUID();
         const newResume = {
-            id: crypto.randomUUID(),
+            id,
             userId,
             jobId,
-            resumeKey,
+            resumeKey: `/resumes/${id}`,
             createdAt: new Date(Date.now())
         } satisfies Resume;
+
+        // upload buffer to S3 here
+        await upload(newResume.resumeKey, resume, "pdf");
 
         // store key in DB
         const response = await db.insert(resumeTable).values(newResume).returning();
@@ -159,6 +153,24 @@ const resumes = new Elysia({ prefix: "/resumes" })
             jobId: z.string(),
         }),
         response: ResumeSchema
+    })
+    .use(listingOwnerGuard)
+    .get("/", async ({ }) => {
+        const response: Resume[] = await db.select().from(resumeTable);
+
+        return response;
+    }, {
+        response: z.array(ResumeSchema)
+    })
+    .get("/:id", async ({ params }) => {
+        const id = params.id;
+
+        const resume = await getResume(id);
+        return resume;
+    }, {
+        params: z.object({
+            id: z.string()
+        })
     })
 
 
