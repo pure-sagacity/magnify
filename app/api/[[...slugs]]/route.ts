@@ -184,7 +184,8 @@ const app = new Elysia({ prefix: '/api' })
             ok: z.boolean()
         })
     })
-    .use(listings);
+    .use(listings)
+    .use(resumes);
 
 export const GET = app.fetch;
 export const POST = app.fetch;
